@@ -83,7 +83,7 @@ function getWebviewContent(): string {
       <head>
           <meta charset="UTF-8">
           <!-- Add highlight.js CSS -->
-          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
           <!-- Add your existing styles -->
           <style>
               body {
@@ -186,24 +186,25 @@ function getWebviewContent(): string {
                   display: flex;
                   justify-content: flex-end;
                   padding: 4px;
-                  background: #f6f8fa;
-                  border-bottom: 1px solid #ddd;
+                  background: #0d1117;  /* GitHub dark background */
+                  border-bottom: 1px solid #30363d;  /* GitHub dark border */
                   border-top-left-radius: 6px;
                   border-top-right-radius: 6px;
               }
 
               .copy-button {
-                  background: transparent;
-                  border: 1px solid #ddd;
+                  background: #21262d;  /* GitHub dark button background */
+                  border: 1px solid #30363d;
                   border-radius: 4px;
                   padding: 4px 8px;
                   cursor: pointer;
                   font-size: 12px;
-                  color: #666;
+                  color: #c9d1d9;  /* GitHub dark text */
               }
 
               .copy-button:hover {
-                  background: #eee;
+                  background: #30363d;
+                  border-color: #8b949e;
               }
 
               /* Adjust pre styling to connect with header */
@@ -211,6 +212,7 @@ function getWebviewContent(): string {
                   margin-top: 0 !important;
                   border-top-left-radius: 0 !important;
                   border-top-right-radius: 0 !important;
+                  border: 1px solid #30363d !important;  /* GitHub dark border */
               }
           </style>
           <title>Deep Seek Chat</title>
