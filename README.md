@@ -35,6 +35,9 @@ ollama run deepseek-r1:8b
 ├── package.json      # Extension manifest
 └── README.md         # This file
 
+<img src="https://github.com/user-attachments/assets/3ff4bc2f-24d1-40b7-95c3-ef037481d6f4" width="300">
+
+
 ## Features
 
 - 🤖 Local AI processing using Ollama
