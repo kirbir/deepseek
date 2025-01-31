@@ -1,6 +1,39 @@
 # DeepSeek Chat for VS Code
 
-A VS Code extension that integrates DeepSeek AI chat directly into your development environment. Powered by Ollama, this extension provides local AI assistance without sending your data to the cloud.
+This repository contains:
+1. 🔧 Source code for the VS Code extension
+2. 📦 Pre-built extension (.vsix) available in [Releases](link-to-releases)
+
+## Quick Install
+
+### Option 1: Install from VSIX
+1. Download `deepseek-0.0.1.vsix` from [Releases](link-to-releases)
+2. In VS Code: `Ctrl+Shift+P` → "Install from VSIX"
+3. Select the downloaded .vsix file
+
+### Option 2: Build from Source
+git clone https://github.com/yourusername/vscode-deepseek-chat.git
+cd vscode-deepseek-chat
+npm install
+npm run package
+
+## Install local DeepSeek model Windows
+1. First, download and install Ollama from the official <a href="https://ollama.com/download">website</a>
+2. Pick a DeepSeekmodel to download and run locally here: <a href="https://ollama.com/library/deepseek-r1">https://ollama.com/library/deepseek-r1</a>
+-- i'm using deepseek-r1:8b in this extension. Pick a model your hardware can handle to run locally.
+3. From the Ollama website copy the command to download the model and run it in your terminal. 
+```console
+ollama run deepseek-r1:8b
+```
+4. Now you should be able to use deepseek chat in the terminal if intallation was successful.
+
+
+## Repository Structure
+/
+├── src/              # Extension source code
+├── .vscode/          # VS Code settings
+├── package.json      # Extension manifest
+└── README.md         # This file
 
 ## Features
 
