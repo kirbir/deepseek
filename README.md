@@ -2,6 +2,9 @@
 
 A VS Code extension that integrates DeepSeek AI chat directly into your development environment. Powered by Ollama, this extension provides local AI assistance without sending your data to the cloud.
 
+<img src="https://github.com/user-attachments/assets/3ff4bc2f-24d1-40b7-95c3-ef037481d6f4" width="300">
+
+
 ## Features
 
 - 🤖 Local AI processing using Ollama
