@@ -6,7 +6,7 @@ This repository contains:
 
 ## Quick Install
 
-### Option 1: Install from VSIX
+### Option 1: Install VS Code Extension from VSIX file
 1. Download `deepseek-0.0.1.vsix` from [Releases](link-to-releases)
 2. In VS Code: `Ctrl+Shift+P` → "Install from VSIX"
 3. Select the downloaded .vsix file
@@ -17,7 +17,7 @@ cd vscode-deepseek-chat
 npm install
 npm run package
 
-## Install local DeepSeek model Windows
+## Install DeepSeek model locally on  Windows
 1. First, download and install Ollama from the official <a href="https://ollama.com/download">website</a>
 2. Pick a DeepSeekmodel to download and run locally here: <a href="https://ollama.com/library/deepseek-r1">https://ollama.com/library/deepseek-r1</a>
 -- i'm using deepseek-r1:8b in this extension. Pick a model your hardware can handle to run locally.
@@ -28,14 +28,7 @@ ollama run deepseek-r1:8b
 4. Now you should be able to use deepseek chat in the terminal if intallation was successful.
 
 
-## Repository Structure
-/
-├── src/              # Extension source code
-├── .vscode/          # VS Code settings
-├── package.json      # Extension manifest
-└── README.md         # This file
-
-<img src="https://github.com/user-attachments/assets/3ff4bc2f-24d1-40b7-95c3-ef037481d6f4" width="300">
+<img src="https://github.com/user-attachments/assets/3ff4bc2f-24d1-40b7-95c3-ef037481d6f4" width="500">
 
 
 ## Features
