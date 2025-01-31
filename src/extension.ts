@@ -119,7 +119,7 @@ function getWebviewContent(): string {
               }
 
               #prompt {
-                  resize: none;
+                  resize: both;
                   min-height: 150px;
                   border: 2px solid #ddd;
                   border-radius: 8px;
@@ -128,6 +128,7 @@ function getWebviewContent(): string {
                   line-height: 1.5;
                   color: #333;
                   transition: border-color 0.3s ease;
+                  width: 70vw;
               }
 
               #prompt:focus {
