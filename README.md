@@ -3,7 +3,7 @@
 
 This repository contains:
 1. 🔧 Source code for the VS Code extension
-2. 📦 Pre-built extension (.vsix) available in [Releases](link-to-releases)
+2. 📦 Pre-built extension (.vsix) available in https://github.com/kirbir/deepseek/releases/tag/v0.0.2
 
 ## Quick Install
 
