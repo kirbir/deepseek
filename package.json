@@ -2,7 +2,7 @@
   "name": "deepseek",
   "displayName": "deepSeek",
   "description": "testing deepseek fud",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.96.0"
   },
@@ -20,6 +20,11 @@
       {
         "command": "deepseek.start",
         "title": "Start Deep Seek Chat",
+        "icon": "assets/icon.svg"
+      },
+      {
+        "command": "sample.showSelectionCount",
+        "title": "Show Selection Count",
         "icon": "assets/icon.svg"
       }
     ],

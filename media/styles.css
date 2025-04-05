@@ -1,0 +1,130 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 1rem;
+    padding: 1rem;
+    color: rgb(224, 241, 239);
+    background-color: rgb(38, 38, 38);
+}
+
+#deepseek-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 800px;
+    width: 100%;
+    padding: 1rem;
+}
+
+#deepseek-title {
+    color: rgb(224, 241, 239);
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+#prompt-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+}
+
+#prompt {
+    resize: none;
+    min-height: 150px;
+    border: 2px solid #ddd;
+    border-radius: 20px;
+    padding: 0.5rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #333;
+    transition: border-color 0.3s ease;
+    width: 70vw;
+}
+
+#prompt:focus {
+    outline: none;
+    border-color: #2196F3;
+}
+
+#askBtn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background-color: #2196F3;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#askBtn:hover {
+    background-color: #1976D2;
+}
+
+#response-container {
+    color: rgb(134, 134, 134);
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+#response {
+    color: rgb(224, 241, 239);
+    line-height: 1.5;
+    font-size: 1rem;
+}
+
+.loading-icon {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #2196F3;
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.code-block-header {
+    display: flex;
+    justify-content: flex-end;
+    padding: 4px;
+    background: #0d1117;  /* GitHub dark background */
+    border-bottom: 1px solid #30363d;  /* GitHub dark border */
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+}
+
+.copy-button {
+    background: #21262d;  /* GitHub dark button background */
+    border: 1px solid #30363d;
+    border-radius: 4px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #c9d1d9;  /* GitHub dark text */
+}
+
+.copy-button:hover {
+    background: #30363d;
+    border-color: #8b949e;
+}
+
+
+/* Adjust pre styling to connect with header */
+pre {
+    margin-top: 0 !important;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+    border: 1px solid #30363d !important;  /* GitHub dark border */
+}

@@ -1,12 +1,49 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
+
+let infoBar: vscode.StatusBarItem;
+let currentSelectedText: string = "";
+
 import ollama from "ollama";
 
 export function activate(context: vscode.ExtensionContext) {
+
+
   const statusBarItem = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Right,
     100
+  );
+  infoBar = vscode.window.createStatusBarItem(
+    vscode.StatusBarAlignment.Left,
+    1000
+  );
+  // register a command that is invoked when the infoBar
+  // item is selected
+  const myCommandId = "sample.showSelectionCount";
+  context.subscriptions.push(
+    vscode.commands.registerCommand(myCommandId, () => {
+      const n = getSelectedText(vscode.window.activeTextEditor);
+      vscode.window.showInformationMessage(
+        `Ask AI About: ${n}`
+      );
+    })
+  );
+
+  // create a new status bar item that we can now manage
+
+  infoBar.command = myCommandId;
+  infoBar.tooltip = "Show selected text";
+  context.subscriptions.push(infoBar);
+  infoBar.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
+  infoBar.text = `$(megaphone) Ready`;
+  infoBar.show();
+
+  // context.subscriptions.push(
+  //   vscode.window.onDidChangeActiveTextEditor(updateStatusBarItem)
+  // );
+  context.subscriptions.push(
+    vscode.window.onDidChangeTextEditorSelection(updateStatusBarItem)
   );
 
   statusBarItem.text = "$(comment-discussion) Deep Seek Chat";
@@ -22,28 +59,30 @@ export function activate(context: vscode.ExtensionContext) {
       { enableScripts: true }
     );
 
-    panel.webview.html = getWebviewContent();
+    panel.webview.html = getWebviewContent(panel.webview,context.extensionUri);
 
     panel.webview.onDidReceiveMessage(async (message: any) => {
       console.log("Received message from webview:", message);
 
       if (message.command === "chat") {
-        const userPrompt = message.text;
+        const userPrompt = message.text + " " + (currentSelectedText );
+        console.log(`The prompt is now: ${userPrompt}`);
         console.log("User prompt:", userPrompt);
         let responseText = "";
 
         try {
           const streamResponse = await ollama.chat({
-            model: 'deepseek-r1:8b',
+            model: "deepseek-r1:8b",
             messages: [
-              { 
-                role: 'system', 
-                content: 'Format your responses using markdown. Use code blocks with appropriate language tags for any code examples.'
+              {
+                role: "system",
+                content:
+                  "Format your responses using markdown. Use code blocks with appropriate language tags for any code examples.",
               },
-              { 
-                role: 'user', 
-                content: userPrompt 
-              }
+              {
+                role: "user",
+                content: userPrompt,
+              },
             ],
             stream: true,
           });
@@ -72,11 +111,35 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   context.subscriptions.push(statusBarItem, disposable);
+  updateStatusBarItem();
+}
+
+function updateStatusBarItem(): void {
+	const selectedText = getSelectedText(vscode.window.activeTextEditor);
+	if (selectedText) {
+		infoBar.text = `$(megaphone) ${selectedText.substring(0,30)}...`;
+		infoBar.show();
+    currentSelectedText = selectedText;
+	} else {
+    infoBar.text = "ready";
+		infoBar.show();
+    currentSelectedText = "";
+	}
+}
+
+function getSelectedText(editor: vscode.TextEditor | undefined): string {
+	if (!editor) return "";
+	
+	return editor.selections.map(selection => editor.document.getText(selection)).join('\n');
+
 }
 
 export function deactivate() {}
 
-function getWebviewContent(): string {
+function getWebviewContent(webview:vscode.Webview, extensionUri:vscode.Uri): string {
+  //get path to css styles
+  const cssUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri,'media','styles.css'));
+
   return /*html*/ `
   <!DOCTYPE html>
   <html>
@@ -84,137 +147,10 @@ function getWebviewContent(): string {
           <meta charset="UTF-8">
           <!-- Add highlight.js CSS -->
           <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
+          <link rel="stylesheet" href="${cssUri}">
           <!-- Add your existing styles -->
           <style>
-              body {
-                  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                  margin: 1rem;
-                  padding: 1rem;
-                  color: rgb(224, 241, 239);
-                  background-color: rgb(38, 38, 38);
-              }
 
-              #deepseek-container {
-                  display: flex;
-                  flex-direction: column;
-                  align-items: center;
-                  max-width: 800px;
-                  width: 100%;
-                  padding: 1rem;
-              }
-
-              #deepseek-title {
-                  color: rgb(224, 241, 239);
-                  font-size: 1.5rem;
-                  margin-bottom: 2rem;
-                  text-align: center;
-              }
-
-              #prompt-container {
-                  display: flex;
-                  flex-direction: column;
-                  align-items: center;
-                  gap: 1rem;
-                  width: 100%;
-              }
-
-              #prompt {
-                  resize: both;
-                  min-height: 150px;
-                  border: 2px solid #ddd;
-                  border-radius: 8px;
-                  padding: 0.5rem;
-                  font-size: 1rem;
-                  line-height: 1.5;
-                  color: #333;
-                  transition: border-color 0.3s ease;
-                  width: 70vw;
-              }
-
-              #prompt:focus {
-                  outline: none;
-                  border-color: #2196F3;
-              }
-
-              #askBtn {
-                  display: inline-block;
-                  padding: 0.5rem 1rem;
-                  background-color: #2196F3;
-                  color: white;
-                  text-decoration: none;
-                  border-radius: 4px;
-                  font-size: 1rem;
-                  cursor: pointer;
-                  transition: background-color 0.3s ease;
-              }
-
-              #askBtn:hover {
-                  background-color: #1976D2;
-              }
-
-              #response-container {
-                  color: rgb(134, 134, 134);
-                  border: 2px solid #ddd;
-                  border-radius: 8px;
-                  padding: 1rem;
-                  margin-top: 1rem;
-                  max-height: 70vh;
-                  overflow-y: auto;
-              }
-
-              #response {
-                  color: rgb(224, 241, 239);
-                  line-height: 1.5;
-                  font-size: 1rem;
-              }
-
-              .loading-icon {
-                  display: inline-block;
-                  width: 20px;
-                  height: 20px;
-                  border: 3px solid #2196F3;
-                  border-top-color: #fff;
-                  border-radius: 50%;
-                  animation: spin 1s ease-in-out infinite;
-              }
-
-              @keyframes spin {
-                  0% { transform: rotate(0deg); }
-                  100% { transform: rotate(360deg); }
-              }
-
-              .code-block-header {
-                  display: flex;
-                  justify-content: flex-end;
-                  padding: 4px;
-                  background: #0d1117;  /* GitHub dark background */
-                  border-bottom: 1px solid #30363d;  /* GitHub dark border */
-                  border-top-left-radius: 6px;
-                  border-top-right-radius: 6px;
-              }
-
-              .copy-button {
-                  background: #21262d;  /* GitHub dark button background */
-                  border: 1px solid #30363d;
-                  border-radius: 4px;
-                  padding: 4px 8px;
-                  cursor: pointer;
-                  font-size: 12px;
-                  color: #c9d1d9;  /* GitHub dark text */
-              }
-
-              .copy-button:hover {
-                  background: #30363d;
-                  border-color: #8b949e;
-              }
-
-              /* Adjust pre styling to connect with header */
-              pre {
-                  margin-top: 0 !important;
-                  border-top-left-radius: 0 !important;
-                  border-top-right-radius: 0 !important;
-                  border: 1px solid #30363d !important;  /* GitHub dark border */
-              }
           </style>
           <title>Deep Seek Chat</title>
       </head>
