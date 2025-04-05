@@ -1,8 +1,9 @@
-# DeepSeek Chat for VS Code
+# Local DeepSeek Chat for VS Code(free not using API)
+# This project uses the distilled Deepseek r1: model 8b
 
 This repository contains:
 1. 🔧 Source code for the VS Code extension
-2. 📦 Pre-built extension (.vsix) available in [Releases](link-to-releases)
+2. 📦 Pre-built extension (.vsix) available in https://github.com/kirbir/deepseek/releases/tag/v0.0.2
 
 ## Quick Install
 
@@ -28,7 +29,8 @@ ollama run deepseek-r1:8b
 4. Now you should be able to use deepseek chat in the terminal if intallation was successful.
 
 
-<img src="https://github.com/user-attachments/assets/3ff4bc2f-24d1-40b7-95c3-ef037481d6f4" width="500">
+![screenshot for 2nd release](https://github.com/user-attachments/assets/a839fdf8-5ed0-40bc-b604-832fbc1cd693)
+
 
 
 ## Features
