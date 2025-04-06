@@ -1,9 +1,48 @@
 body {
+    display: flex;
+    flex-flow: column;
+    justify-items: center;
+    align-items: center;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 1rem;
     padding: 1rem;
     color: rgb(224, 241, 239);
     background-color: rgb(38, 38, 38);
+}
+
+#header-status{
+    padding:14px;
+    border-radius: 2px;
+    border: 1px rgb(118, 118, 118) solid;
+    display: flex;
+    width: fit-content;
+    justify-content: center;
+    align-items: center;
+    gap:10px;
+    flex-flow: row nowrap;
+    color:rgb(255, 249, 174);
+}
+
+#header-status {
+    display: flex;
+    color:rgb(211, 211, 211);
+}
+
+
+.menu-title{
+    border: 2px rgb(92, 92, 92) dashed;
+    text-decoration-color: #d0950c;
+    display: flex;
+    gap:10px;
+    flex-flow: row nowrap;
+    color:rgb(238, 232, 140);
+}
+
+.menu-item{
+    display: flex;
+    gap:10px;
+    flex-flow: row nowrap;
+    color:rgb(236, 235, 221);
 }
 
 #deepseek-container {
@@ -31,21 +70,40 @@ body {
 }
 
 #prompt {
-    resize: none;
-    min-height: 150px;
-    border: 2px solid #ddd;
-    border-radius: 20px;
-    padding: 0.5rem;
-    font-size: 1rem;
+    width: 100%;
+    max-width: 800px;
+    background-color: #c0c0c0;
+    color: #2e2e2e;
+    font-size: 14px;
     line-height: 1.5;
-    color: #333;
-    transition: border-color 0.3s ease;
-    width: 70vw;
+    padding: 10px 12px;
+    border: 1px solid #444;
+    border-radius: 8px;
+    resize: none;
+    overflow: hidden;
+    min-height: 40px;
+    max-height: 180px;
+    transition: height 0.15s ease-in-out;
+    box-sizing: border-box;
 }
 
+#text-wrapper {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #1e1e1e;
+    border-top: 1px solid #333;
+    padding: 12px 16px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+  }
+
 #prompt:focus {
-    outline: none;
-    border-color: #2196F3;
+    outline: #d0950c;
+    border-color: #f4de86;
 }
 
 #askBtn {
@@ -54,7 +112,7 @@ body {
     background-color: #2196F3;
     color: white;
     text-decoration: none;
-    border-radius: 4px;
+    border-radius: 8px;
     font-size: 1rem;
     cursor: pointer;
     transition: background-color 0.3s ease;
@@ -65,6 +123,7 @@ body {
 }
 
 #response-container {
+    display: hidden;
     color: rgb(134, 134, 134);
     border: 2px solid #ddd;
     border-radius: 8px;
@@ -81,7 +140,7 @@ body {
 }
 
 .loading-icon {
-    display: inline-block;
+    display: none;
     width: 20px;
     height: 20px;
     border: 3px solid #2196F3;
