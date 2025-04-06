@@ -1,10 +1,15 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
+import { ChatSession, ChatMessage } from "./types/types";
 
 let infoBar: vscode.StatusBarItem;
 let currentSelectedText: string = "";
 
+let currentChatSession: ChatSession = {
+  messages: [],
+  created: Date.now(),
+};
 
 import ollama from "ollama";
 
@@ -101,6 +106,7 @@ export function activate(context: vscode.ExtensionContext) {
             panel.webview.postMessage({
               command: "chatResponse",
               text: responseText,
+              history: currentChatSession.messages
             });
           }
         } catch (error) {
@@ -114,6 +120,20 @@ export function activate(context: vscode.ExtensionContext) {
         panel.webview.postMessage({
           command: "chatResponse",
           text: responseText,
+          history: currentChatSession.messages.slice(-10),
+        });
+
+        // Add respone and user prompt history to storage in array
+        currentChatSession.messages.push({
+          role: "user",
+          content: userPrompt,
+          timestamp: Date.now(),
+        });
+
+        currentChatSession.messages.push({
+          role: "assistant",
+          content: responseText,
+          timestamp: Date.now(),
         });
       }
     });
@@ -204,6 +224,10 @@ function getWebviewContent(
       }
     </span>
       </div>
+      <div id="recent-history">
+      <h3>Recent Conversations</h3>
+      <div id="history-list"></div>
+  </div>
       </header>
           <div id="deepseek-container">
               <h1 id="deepseek-title">Deep Seek Chat</h1>
@@ -285,8 +309,31 @@ prompt.value ="".trim();
 
               // Handle response
               window.addEventListener('message', event => {
-                  const {command, text} = event.data;
+                  const {command, text,history} = event.data;
                   if (command === 'chatResponse') {
+                    
+         // List the chat history
+         let recentHistory = document.getElementById('history-list');
+        recentHistory.innerHTML = ''; // Clear existing history
+
+        if (history && history.length > 0) {
+            history.slice(-10).forEach(msg => {
+                const historyEntry = document.createElement("p");
+                historyEntry.style.borderBottom = '1px solid #333';
+                historyEntry.style.padding = '4px';
+                
+                // Simple text node with role emoji and content
+                const icon = msg.role === 'user' ? '👤' : '🤖';
+                const content = msg.content.substring(0, 50);
+                const textnode = document.createTextNode(icon + ' ' + content);
+                
+                historyEntry.appendChild(textnode);
+                recentHistory.appendChild(historyEntry);
+            });
+        }
+
+
+
                       // Convert markdown to HTML with syntax highlighting
                       const htmlContent = marked.parse(text);
                       document.getElementById('response').innerHTML = htmlContent;
@@ -324,7 +371,11 @@ prompt.value ="".trim();
 
                           // Apply syntax highlighting
                           hljs.highlightBlock(block);
+
+
                       });
+                      
+                      
                   }
               });
           </script>
