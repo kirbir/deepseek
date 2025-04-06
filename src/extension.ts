@@ -25,7 +25,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   // register a command that is invoked when the infoBar
   // item is selected
-  const myCommandId = "sample.showSelectionCount";
+  const myCommandId = "deepseek.useSelectionContext";
   context.subscriptions.push(
     vscode.commands.registerCommand(myCommandId, () => {
       const n = getSelectedText(vscode.window.activeTextEditor);
@@ -36,7 +36,7 @@ export function activate(context: vscode.ExtensionContext) {
   // create a new status bar item that we can now manage
 
   infoBar.command = myCommandId;
-  infoBar.tooltip = "Show selected text";
+  infoBar.tooltip = "Use selected text as context";
   context.subscriptions.push(infoBar);
   infoBar.backgroundColor = new vscode.ThemeColor(
     "statusBarItem.warningBackground"
@@ -106,7 +106,7 @@ export function activate(context: vscode.ExtensionContext) {
             panel.webview.postMessage({
               command: "chatResponse",
               text: responseText,
-              history: currentChatSession.messages
+              history: currentChatSession.messages,
             });
           }
         } catch (error) {
@@ -312,12 +312,12 @@ prompt.value ="".trim();
                   const {command, text,history} = event.data;
                   if (command === 'chatResponse') {
                     
-         // List the chat history
-         let recentHistory = document.getElementById('history-list');
-        recentHistory.innerHTML = ''; // Clear existing history
+              // List the chat history
+              let recentHistory = document.getElementById('history-list');
+              recentHistory.innerHTML = ''; // Clear existing history
 
-        if (history && history.length > 0) {
-            history.slice(-10).forEach(msg => {
+              if (history && history.length > 0) {
+               history.slice(-10).forEach(msg => {
                 const historyEntry = document.createElement("p");
                 historyEntry.style.borderBottom = '1px solid #333';
                 historyEntry.style.padding = '4px';
@@ -329,8 +329,8 @@ prompt.value ="".trim();
                 
                 historyEntry.appendChild(textnode);
                 recentHistory.appendChild(historyEntry);
-            });
-        }
+                 });
+               }
 
 
 

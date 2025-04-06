@@ -4,7 +4,7 @@
   "description": "testing deepseek fud",
   "version": "0.0.2",
   "engines": {
-    "vscode": "^1.96.0"
+    "vscode": "^1.96.2"
   },
   "categories": [
     "Other"
@@ -23,8 +23,8 @@
         "icon": "assets/icon.svg"
       },
       {
-        "command": "sample.showSelectionCount",
-        "title": "Show Selection Count",
+        "command": "deepseek.useSelectionContext",
+        "title": "Use Selection as Context",
         "icon": "assets/icon.svg"
       }
     ],
@@ -39,11 +39,19 @@
         {
           "command": "deepseek.start",
           "group": "navigation"
+        },
+        {
+          "command": "deepseek.useSelectionContext",
+          "group": "navigation"
         }
       ],
       "editor/title": [
         {
           "command": "deepseek.start",
+          "group": "navigation"
+        },
+        {
+          "command": "deepseek.useSelectionContext",
           "group": "navigation"
         }
       ]
