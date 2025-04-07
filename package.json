@@ -2,7 +2,7 @@
   "name": "deepseek",
   "displayName": "deepSeek",
   "description": "testing deepseek fud",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "engines": {
     "vscode": "^1.96.2"
   },
