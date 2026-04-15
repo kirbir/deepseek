@@ -1,10 +1,13 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
-import { ChatSession, ChatMessage } from "./types/types";
+import { ChatSession } from "./types/types";
 
 let infoBar: vscode.StatusBarItem;
 let currentSelectedText: string = "";
+let availableModels: string[] = [];
+let selectedModel: string = "";
+const preferredModel = "gemma4";
 
 let currentChatSession: ChatSession = {
   messages: [],
@@ -12,6 +15,18 @@ let currentChatSession: ChatSession = {
 };
 
 import ollama from "ollama";
+
+type OllamaStatus = {
+  installed: boolean;
+  hasModels: boolean;
+  modelNames: string[];
+  selectedModel: string;
+};
+
+function getInitialSelectedModel(modelNames: string[]): string {
+  const gemmaModel = modelNames.find((model) => model.startsWith(preferredModel));
+  return gemmaModel || modelNames[0] || "";
+}
 
 export function activate(context: vscode.ExtensionContext) {
   const statusBarItem = vscode.window.createStatusBarItem(
@@ -68,10 +83,7 @@ export function activate(context: vscode.ExtensionContext) {
       panel.webview.html = getWebviewContent(
         panel.webview,
         context.extensionUri,
-        {
-          ...ollamaStatus,
-          modelName: "deepseek-r1:8b", // Adding required modelName property
-        }
+        ollamaStatus
       );
     });
 
@@ -84,21 +96,38 @@ export function activate(context: vscode.ExtensionContext) {
           canSelectFolders: false,
           canSelectMany: false,
           filters: {
-            'Images': ['png', 'jpg', 'jpeg', 'gif', 'webp']
-          }
+            Images: ["png", "jpg", "jpeg", "gif", "webp"],
+          },
         });
 
         if (result && result[0]) {
           const imageData = await vscode.workspace.fs.readFile(result[0]);
-          const base64Image = Buffer.from(imageData).toString('base64');
+          const base64Image = Buffer.from(imageData).toString("base64");
           panel.webview.postMessage({
-            command: 'imageSelected',
-            imageData: base64Image
+            command: "imageSelected",
+            imageData: base64Image,
           });
         }
       }
 
       if (message.command === "chat") {
+        if (!availableModels.includes(selectedModel)) {
+          selectedModel = getInitialSelectedModel(availableModels);
+          panel.webview.postMessage({
+            command: "modelChanged",
+            model: selectedModel,
+          });
+        }
+
+        if (!selectedModel) {
+          panel.webview.postMessage({
+            command: "chatResponse",
+            text: "```error\nNo Ollama model selected. Please pull a model (for example: ollama pull gemma4) and choose it from the model picker.\n```",
+            history: currentChatSession.messages.slice(-10),
+          });
+          return;
+        }
+
         const userPrompt = message.text + " " + currentSelectedText;
         console.log(`The prompt is now: ${userPrompt}`);
         console.log("User prompt:", userPrompt);
@@ -108,17 +137,18 @@ export function activate(context: vscode.ExtensionContext) {
           const messages = [
             {
               role: "system",
-              content: "Format your responses using markdown. Use code blocks with appropriate language tags for any code examples.",
+              content:
+                "Format your responses using markdown. Use code blocks with appropriate language tags for any code examples.",
             },
             {
               role: "user",
               content: userPrompt,
-              ...(message.image ? { images: [message.image] } : {})
-            }
+              ...(message.image ? { images: [message.image] } : {}),
+            },
           ];
 
           const streamResponse = await ollama.chat({
-            model: "deepseek-r1:8b",
+            model: selectedModel,
             messages,
             stream: true,
           });
@@ -130,6 +160,7 @@ export function activate(context: vscode.ExtensionContext) {
               text: responseText,
               history: currentChatSession.messages,
             });
+            currentSelectedText = "";
           }
         } catch (error) {
           console.error("Error:", error);
@@ -150,7 +181,7 @@ export function activate(context: vscode.ExtensionContext) {
           role: "user",
           content: userPrompt,
           timestamp: Date.now(),
-          ...(message.image ? { images: [message.image] } : {})
+          ...(message.image ? { images: [message.image] } : {}),
         });
 
         currentChatSession.messages.push({
@@ -159,6 +190,17 @@ export function activate(context: vscode.ExtensionContext) {
           timestamp: Date.now(),
         });
       }
+
+      if (message.command === "setModel") {
+        const requestedModel = String(message.model || "");
+        if (availableModels.includes(requestedModel)) {
+          selectedModel = requestedModel;
+          panel.webview.postMessage({
+            command: "modelChanged",
+            model: selectedModel,
+          });
+        }
+      }
     });
   });
 
@@ -166,31 +208,33 @@ export function activate(context: vscode.ExtensionContext) {
   updateStatusBarItem();
 }
 
-async function checkOllamaSetup(): Promise<{
-  installed: boolean;
-  model: boolean;
-}> {
+async function checkOllamaSetup(): Promise<OllamaStatus> {
   try {
     const response = await ollama.list();
-    const deepSeekModel = response.models.find((model) =>
-      model.name.startsWith("deepseek-r1")
-    );
-
-    const hasDeepSeek = !!deepSeekModel;
-    const modelName = deepSeekModel?.name || "";
+    availableModels = response.models.map((model) => model.name);
+    selectedModel = getInitialSelectedModel(availableModels);
     return {
       installed: true,
-      model: hasDeepSeek,
+      hasModels: availableModels.length > 0,
+      modelNames: availableModels,
+      selectedModel,
     };
   } catch (error) {
-    return { installed: false, model: false };
+    availableModels = [];
+    selectedModel = "";
+    return {
+      installed: false,
+      hasModels: false,
+      modelNames: [],
+      selectedModel: "",
+    };
   }
 }
 
 function updateStatusBarItem(): void {
   const selectedText = getSelectedText(vscode.window.activeTextEditor);
   if (selectedText) {
-    infoBar.text = `$(megaphone) ${selectedText.substring(0, 30)}...`;
+    infoBar.text = `$(megaphone) ${selectedText.substring(0, 8)}...`;
     infoBar.show();
     currentSelectedText = selectedText;
   } else {
@@ -213,14 +257,14 @@ export function deactivate() {}
 function getWebviewContent(
   webview: vscode.Webview,
   extensionUri: vscode.Uri,
-  ollamaStatus: { installed: boolean; model: boolean; modelName: string }
+  ollamaStatus: OllamaStatus
 ): string {
   const cssUri = webview.asWebviewUri(
     vscode.Uri.joinPath(extensionUri, "media", "styles.css")
   );
 
   // Separate HTML sections for clarity
-  const head = /*html*/`
+  const head = /*html*/ `
     <head>
       <meta charset="UTF-8">
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
@@ -229,7 +273,7 @@ function getWebviewContent(
     </head>
   `;
 
-  const headerStatus = /*html*/`
+  const headerStatus = /*html*/ `
     <div id="header-status" style="display:flex; align-items:center;">
     <p class="menu-item" id="isOllamaInstalledText">Loading... </p>
     <p class="menu-item" id="isDeepseekInstalledText">Loading... </p>
@@ -243,13 +287,39 @@ function getWebviewContent(
     </header>
   `;
 
-  const mainContent = /*html*/`
+  const mainContent = /*html*/ `
     <div id="deepseek-container">
       <h1 id="deepseek-title">What's on your mind?</h1>
+      <!-- Display selected text/code used for Ai prompt context -->
+      <div id="context-display">
+      <p>
+      ${
+        currentSelectedText
+          ? `Current context: ${currentSelectedText.slice(0, 100)}`
+          : "No text selection detected, you can select text/code press CTRL+SHIFT+D to use it as context for your prompt"
+      }
+      </p>
+      </div>
       <div id="prompt-container">
-      DeepSeek Model: ${ollamaStatus.model 
-        ? `Ready (${ollamaStatus.modelName})` 
-        : "Not Found - Please run: ollama pull deepseek-r1:8b"}
+      <div id="model-picker-container">
+        <label for="modelSelect">Ollama Model</label>
+        <select id="modelSelect" ${!ollamaStatus.hasModels ? "disabled" : ""}>
+          ${
+            ollamaStatus.modelNames.length > 0
+              ? ollamaStatus.modelNames
+                  .map(
+                    (modelName) =>
+                      `<option value="${modelName}" ${
+                        modelName === ollamaStatus.selectedModel
+                          ? "selected"
+                          : ""
+                      }>${modelName}</option>`
+                  )
+                  .join("")
+              : '<option value="">No models installed</option>'
+          }
+        </select>
+      </div>
         <div id="text-wrapper">
           <button id="imageBtn" title="Upload Image">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -284,7 +354,7 @@ function getWebviewContent(
     </div>
   `;
 
-  const scripts = /*html*/`
+  const scripts = /*html*/ `
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"><\/script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"><\/script>
     <script>
@@ -293,6 +363,7 @@ function getWebviewContent(
       const loadingElement = document.getElementById('loading');
       const askButton = document.getElementById('askBtn');
       const imageBtn = document.getElementById('imageBtn');
+      const modelSelect = document.getElementById('modelSelect');
       let selectedImageData = null;
 
       // Image button click handler
@@ -333,9 +404,18 @@ function getWebviewContent(
       isOllamaInstalledElement.innerHTML = ${ollamaStatus.installed} ? 'OLLAMA - Active' : 'not found';
       
       const isDeepseekInstalledElement = document.getElementById('isDeepseekInstalledText');
-      isDeepseekInstalledElement.innerHTML = ${ollamaStatus.model} 
-        ? 'DEEPSEEK - Active' 
-        : 'not found -  Please run: ollama pull deepseek-r1:8b';
+      isDeepseekInstalledElement.innerHTML = ${
+        ollamaStatus.hasModels
+      } ? 'Selected: ${ollamaStatus.selectedModel}' : 'No models found - Please run: ollama pull gemma4';
+      askButton.disabled = ${!ollamaStatus.installed || !ollamaStatus.hasModels};
+
+      modelSelect?.addEventListener('change', () => {
+        const nextModel = modelSelect.value;
+        vscode.postMessage({
+          command: 'setModel',
+          model: nextModel
+        });
+      });
 
       // Event Listeners
       askButton.addEventListener('click', () => {
@@ -385,7 +465,7 @@ function getWebviewContent(
           
           // Reset UI state
           loadingElement.style.display = 'none';
-          askButton.disabled = false;
+          askButton.disabled = modelSelect ? modelSelect.disabled : false;
           
           // Add copy buttons to code blocks
           document.querySelectorAll('pre code').forEach((block) => {
@@ -410,12 +490,16 @@ function getWebviewContent(
             hljs.highlightBlock(block);
           });
         }
+
+        if (command === 'modelChanged') {
+          isDeepseekInstalledElement.innerHTML = 'Selected: ' + (event.data.model || '');
+        }
       });
     <\/script>
   `;
 
   // Combine all sections
-  return /*html*/`
+  return /*html*/ `
     <!DOCTYPE html>
     <html>
       ${head}

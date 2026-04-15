@@ -72,6 +72,36 @@ header {
     width: 100%;
 }
 
+#model-picker-container {
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: rgb(224, 241, 239);
+}
+
+#model-picker-container label {
+    font-size: 0.9rem;
+    color: rgb(236, 235, 221);
+}
+
+#modelSelect {
+    flex: 1;
+    max-width: 420px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #666;
+    background: #2f2f2f;
+    color: #f0f0f0;
+}
+
+#modelSelect:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
 #prompt {
     text-align: center;
     width: 100%;
@@ -257,4 +287,12 @@ pre {
 #selectedImage {
     border-radius: 8px;
     border: 2px solid #444;
+}
+
+#context-display {
+    color: #d5d3d3;
+    padding: 2px;
+    border: 1px #858585;
+    border-radius: 8px;
+    background-color: #444;
 }
