@@ -236,8 +236,9 @@ function updateStatusBarItem() {
     }
 }
 function getSelectedText(editor) {
-    if (!editor)
+    if (!editor) {
         return "";
+    }
     return editor.selections
         .map((selection) => editor.document.getText(selection))
         .join("\n");
@@ -334,6 +335,7 @@ function getWebviewContent(webview, extensionUri, ollamaStatus) {
       const askButton = document.getElementById('askBtn');
       const imageBtn = document.getElementById('imageBtn');
       const modelSelect = document.getElementById('modelSelect');
+      const responseContainer = document.getElementById('response-container');
       let selectedImageData = null;
 
       // Image button click handler
@@ -356,6 +358,13 @@ function getWebviewContent(webview, extensionUri, ollamaStatus) {
       prompt.addEventListener('input', autoResize);
       autoResize();
       prompt.value = "".trim();
+
+      const scrollResponseToBottom = () => {
+        if (!responseContainer) {
+          return;
+        }
+        responseContainer.scrollTop = responseContainer.scrollHeight;
+      };
 
       // Configure marked
       marked.setOptions({
@@ -430,6 +439,7 @@ function getWebviewContent(webview, extensionUri, ollamaStatus) {
           // Update response
           const htmlContent = marked.parse(text);
           document.getElementById('response').innerHTML = htmlContent;
+          scrollResponseToBottom();
           
           // Reset UI state
           loadingElement.style.display = 'none';
@@ -457,6 +467,7 @@ function getWebviewContent(webview, extensionUri, ollamaStatus) {
             block.parentElement?.insertBefore(buttonContainer, block);
             hljs.highlightBlock(block);
           });
+          scrollResponseToBottom();
         }
 
         if (command === 'modelChanged') {

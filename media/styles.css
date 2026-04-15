@@ -79,6 +79,7 @@ header {
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+    margin-bottom: 10px;
     color: rgb(224, 241, 239);
 }
 

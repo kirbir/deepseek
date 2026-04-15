@@ -24,18 +24,20 @@ type OllamaStatus = {
 };
 
 function getInitialSelectedModel(modelNames: string[]): string {
-  const gemmaModel = modelNames.find((model) => model.startsWith(preferredModel));
+  const gemmaModel = modelNames.find((model) =>
+    model.startsWith(preferredModel),
+  );
   return gemmaModel || modelNames[0] || "";
 }
 
 export function activate(context: vscode.ExtensionContext) {
   const statusBarItem = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Right,
-    100
+    100,
   );
   infoBar = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Left,
-    1000
+    1000,
   );
 
   // register a command that is invoked when the infoBar
@@ -45,7 +47,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(myCommandId, () => {
       const n = getSelectedText(vscode.window.activeTextEditor);
       vscode.window.showInformationMessage(`Ask AI About: ${n}`);
-    })
+    }),
   );
 
   // create a new status bar item that we can now manage
@@ -54,7 +56,7 @@ export function activate(context: vscode.ExtensionContext) {
   infoBar.tooltip = "Use selected text as context";
   context.subscriptions.push(infoBar);
   infoBar.backgroundColor = new vscode.ThemeColor(
-    "statusBarItem.warningBackground"
+    "statusBarItem.warningBackground",
   );
   infoBar.text = `$(megaphone) Ready`;
   infoBar.show();
@@ -63,7 +65,7 @@ export function activate(context: vscode.ExtensionContext) {
   //   vscode.window.onDidChangeActiveTextEditor(updateStatusBarItem)
   // );
   context.subscriptions.push(
-    vscode.window.onDidChangeTextEditorSelection(updateStatusBarItem)
+    vscode.window.onDidChangeTextEditorSelection(updateStatusBarItem),
   );
 
   statusBarItem.text = "$(comment-discussion) Deep Seek Chat";
@@ -76,14 +78,14 @@ export function activate(context: vscode.ExtensionContext) {
       "deepChat",
       "Deep Seek Chat",
       vscode.ViewColumn.Two,
-      { enableScripts: true }
+      { enableScripts: true },
     );
     // Check Ollama status and update the webview
     checkOllamaSetup().then((ollamaStatus) => {
       panel.webview.html = getWebviewContent(
         panel.webview,
         context.extensionUri,
-        ollamaStatus
+        ollamaStatus,
       );
     });
 
@@ -245,7 +247,9 @@ function updateStatusBarItem(): void {
 }
 
 function getSelectedText(editor: vscode.TextEditor | undefined): string {
-  if (!editor) return "";
+  if (!editor) {
+    return "";
+  }
 
   return editor.selections
     .map((selection) => editor.document.getText(selection))
@@ -257,10 +261,10 @@ export function deactivate() {}
 function getWebviewContent(
   webview: vscode.Webview,
   extensionUri: vscode.Uri,
-  ollamaStatus: OllamaStatus
+  ollamaStatus: OllamaStatus,
 ): string {
   const cssUri = webview.asWebviewUri(
-    vscode.Uri.joinPath(extensionUri, "media", "styles.css")
+    vscode.Uri.joinPath(extensionUri, "media", "styles.css"),
   );
 
   // Separate HTML sections for clarity
@@ -313,7 +317,7 @@ function getWebviewContent(
                         modelName === ollamaStatus.selectedModel
                           ? "selected"
                           : ""
-                      }>${modelName}</option>`
+                      }>${modelName}</option>`,
                   )
                   .join("")
               : '<option value="">No models installed</option>'
@@ -364,6 +368,7 @@ function getWebviewContent(
       const askButton = document.getElementById('askBtn');
       const imageBtn = document.getElementById('imageBtn');
       const modelSelect = document.getElementById('modelSelect');
+      const responseContainer = document.getElementById('response-container');
       let selectedImageData = null;
 
       // Image button click handler
@@ -386,6 +391,13 @@ function getWebviewContent(
       prompt.addEventListener('input', autoResize);
       autoResize();
       prompt.value = "".trim();
+
+      const scrollResponseToBottom = () => {
+        if (!responseContainer) {
+          return;
+        }
+        responseContainer.scrollTop = responseContainer.scrollHeight;
+      };
 
       // Configure marked
       marked.setOptions({
@@ -462,6 +474,7 @@ function getWebviewContent(
           // Update response
           const htmlContent = marked.parse(text);
           document.getElementById('response').innerHTML = htmlContent;
+          scrollResponseToBottom();
           
           // Reset UI state
           loadingElement.style.display = 'none';
@@ -489,6 +502,7 @@ function getWebviewContent(
             block.parentElement?.insertBefore(buttonContainer, block);
             hljs.highlightBlock(block);
           });
+          scrollResponseToBottom();
         }
 
         if (command === 'modelChanged') {
